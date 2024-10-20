@@ -1,0 +1,53 @@
+from frouros.detectors.concept_drift import PageHinkley, PageHinkleyConfig
+import numpy as np
+import matplotlib.pyplot as plt
+
+# Define the Page-Hinkley configuration
+config = PageHinkleyConfig()
+config.min_instances = 10
+config.delta = 0.0005  # Adjust delta for sensitivity
+config.lambda_ = 70     # Adjust lambda for sensitivity
+config.alpha = 1 - 0.0001
+
+# Initialize Page-Hinkley detector
+ph_detector = PageHinkley(config=config)
+
+# Drift detection setup
+drift_detected = False
+drift_points = []
+
+# Print the types and shapes of y_pred and y_test_actual
+print("y_pred type:", type(y_pred), "y_pred shape:", y_pred.shape)
+print("y_test_actual type:", type(y_test_actual), "y_test_actual shape:", y_test_actual.shape)
+
+# Ensure y_pred and y_test_actual are numpy arrays for proper indexing
+y_pred_values = y_pred.values().flatten()  # Reshape to 1D array
+y_test_actual_values = y_test_actual.values().flatten()  # Reshape to 1D array
+
+# Monitor predictions for drift using Page-Hinkley
+for i in range(len(y_pred_values)):
+    # Calculate the error using the flattened arrays
+    error = float(y_test_actual_values[i] - y_pred_values[i])
+    ph_detector.update(error)
+    
+    if ph_detector.drift:
+        drift_detected = True
+        drift_points.append(i)
+        print(f"Drift detected at point: {i}")
+
+if drift_detected:
+    print(f"Drift detected at points: {drift_points}")
+else:
+    print("No drift detected.")
+
+# --- Plotting the results ---
+plt.figure(figsize=(12, 6))
+plt.plot(y_test_actual_values, label="Actual Values", color="blue")
+plt.plot(y_pred_values, label="Predicted Values", color="orange")
+if drift_points:
+    plt.scatter(drift_points, y_test_actual_values[drift_points], color="red", label="Drift Points", zorder=5)
+plt.xlabel("Data Points")
+plt.ylabel("Values")
+plt.title("Drift Detection using Page-Hinkley")
+plt.legend()
+plt.show()
