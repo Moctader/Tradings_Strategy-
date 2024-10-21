@@ -213,13 +213,17 @@ class TradingModel:
         plt.legend()
         plt.show()
 
-# Example usage
+
+
+
+# Load the Trading Model
 trading_model = TradingModel(
     model_path="./nlinear_model.pth",
     data_path="features.pickle",
     target_column='label'
 )
 
+# Load the data, model, predict, evaluate, and plot
 trading_model.load_data()
 trading_model.load_model()
 trading_model.predict()
